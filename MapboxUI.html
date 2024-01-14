@@ -1,0 +1,305 @@
+<!doctype html>
+<html lang="en" data-bs-theme="auto">
+
+<head>
+  <script src="js/color-modes.js"></script>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="">
+  <meta name="author" content="Mark Otto, Jacob Thornton, and Bootstrap contributors">
+  <meta name="generator" content="Hugo 0.118.2">
+  <title>Good Mapbox</title>
+
+  <!-- mapbox -->
+  <script src='https://api.mapbox.com/mapbox-gl-js/v2.9.1/mapbox-gl.js'></script>
+  <script src="https://cdn.jsdelivr.net/npm/@turf/turf"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@docsearch/css@3">
+  <link href='https://api.mapbox.com/mapbox-gl-js/v2.9.1/mapbox-gl.css' rel='stylesheet' />
+  <!-- 搜索器 -->
+  <script
+    src='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.3.0/mapbox-gl-geocoder.min.js'></script>
+  <!-- 搜索器css -->
+  <link rel='stylesheet' type='text/css'
+    href='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.3.0/mapbox-gl-geocoder.css' />
+  <!-- mapbox语言 -->
+  <script src='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-language/v0.9.2/mapbox-gl-language.js'></script>
+
+  <!--柳世钢-----------图表及页面整体框架样式-->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@docsearch/css@3">
+  <link rel="canonical" href="https://getbootstrap.com/docs/5.3/examples/navbar-fixed/">
+  <script src="js/echarts.js"></script>
+  <script src="js/bootstrap.bundle.min.js"></script>
+  <link href="css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="assets/iconfont.css">
+  <link href="css_user/MapboxUICSS.css" rel="stylesheet">
+  <!--柳世钢-----------图表及页面整体框架样式-->
+
+  <!--叶垚森-----------侧边栏-->
+  <link href="css_user/sidebox.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/boxicons@2.0.5/css/boxicons.min.css" rel="stylesheet" />
+  <!--叶垚森-----------侧边栏-->
+
+  <!--叶垚森-----------地理分析-->
+  <script src="https://unpkg.com/@turf/turf/turf.min.js"></script>
+  <script src="https://fastly.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+  <script src="https://unpkg.com/@mapbox/polyline"></script>
+  <!--叶垚森-----------地理分析-->
+
+  <!-- 王斯畅 -------------->
+  <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+  <!-- 引入Mapbox GL Geocoder插件 -->
+</head>
+
+<!-- 面积测量 -->
+<script src="https://unpkg.com/@turf/turf@6/turf.min.js"></script>
+<script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v1.4.0/mapbox-gl-draw.js"></script>
+<link rel="stylesheet" href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v1.4.0/mapbox-gl-draw.css"
+  type="text/css">
+
+<body onload="window.dispatchEvent(new Event('resize'));">
+  <!-- 柳世钢-----页面基本布局 --------------------------------------------------->
+  <!-- 主题切换图标 -->
+  <svg xmlns="http://www.w3.org/2000/svg" class="d-none">
+    <symbol id="check2" viewBox="0 0 16 16">
+      <path
+        d="M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z" />
+    </symbol>
+    <symbol id="circle-half" viewBox="0 0 16 16">
+      <path d="M8 15A7 7 0 1 0 8 1v14zm0 1A8 8 0 1 1 8 0a8 8 0 0 1 0 16z" />
+    </symbol>
+    <symbol id="moon-stars-fill" viewBox="0 0 16 16">
+      <path
+        d="M6 .278a.768.768 0 0 1 .08.858 7.208 7.208 0 0 0-.878 3.46c0 4.021 3.278 7.277 7.318 7.277.527 0 1.04-.055 1.533-.16a.787.787 0 0 1 .81.316.733.733 0 0 1-.031.893A8.349 8.349 0 0 1 8.344 16C3.734 16 0 12.286 0 7.71 0 4.266 2.114 1.312 5.124.06A.752.752 0 0 1 6 .278z" />
+      <path
+        d="M10.794 3.148a.217.217 0 0 1 .412 0l.387 1.162c.173.518.579.924 1.097 1.097l1.162.387a.217.217 0 0 1 0 .412l-1.162.387a1.734 1.734 0 0 0-1.097 1.097l-.387 1.162a.217.217 0 0 1-.412 0l-.387-1.162A1.734 1.734 0 0 0 9.31 6.593l-1.162-.387a.217.217 0 0 1 0-.412l1.162-.387a1.734 1.734 0 0 0 1.097-1.097l.387-1.162zM13.863.099a.145.145 0 0 1 .274 0l.258.774c.115.346.386.617.732.732l.774.258a.145.145 0 0 1 0 .274l-.774.258a1.156 1.156 0 0 0-.732.732l-.258.774a.145.145 0 0 1-.274 0l-.258-.774a1.156 1.156 0 0 0-.732-.732l-.774-.258a.145.145 0 0 1 0-.274l.774-.258c.346-.115.617-.386.732-.732L13.863.1z" />
+    </symbol>
+    <symbol id="sun-fill" viewBox="0 0 16 16">
+      <path
+        d="M8 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM8 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 0zm0 13a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 13zm8-5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2a.5.5 0 0 1 .5.5zM3 8a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2A.5.5 0 0 1 3 8zm10.657-5.657a.5.5 0 0 1 0 .707l-1.414 1.415a.5.5 0 1 1-.707-.708l1.414-1.414a.5.5 0 0 1 .707 0zm-9.193 9.193a.5.5 0 0 1 0 .707L3.05 13.657a.5.5 0 0 1-.707-.707l1.414-1.414a.5.5 0 0 1 .707 0zm9.193 2.121a.5.5 0 0 1-.707 0l-1.414-1.414a.5.5 0 0 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .707zM4.464 4.465a.5.5 0 0 1-.707 0L2.343 3.05a.5.5 0 1 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .708z" />
+    </symbol>
+  </svg>
+
+  <!--主题转换按钮-->
+  <div class="dropdown position-fixed bottom-0 end-0 mb-3 me-3 bd-mode-toggle">
+    <button class="btn btn-bd-primary py-2 dropdown-toggle d-flex align-items-center" id="bd-theme" type="button"
+      aria-expanded="false" data-bs-toggle="dropdown" aria-label="Toggle theme (auto)">
+      <svg class="bi my-1 theme-icon-active" width="1em" height="1em">
+        <use href="#circle-half"></use>
+      </svg>
+      <span class="visually-hidden" id="bd-theme-text">Toggle theme</span>
+    </button>
+    <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="bd-theme-text">
+      <li>
+        <button type="button" class="dropdown-item d-flex align-items-center" data-bs-theme-value="light"
+          aria-pressed="false">
+          <svg class="bi me-2 opacity-50 theme-icon" width="1em" height="1em">
+            <use href="#sun-fill"></use>
+          </svg>
+          Light
+          <svg class="bi ms-auto d-none" width="1em" height="1em">
+            <use href="#check2"></use>
+          </svg>
+        </button>
+      </li>
+      <li>
+        <button type="button" class="dropdown-item d-flex align-items-center" data-bs-theme-value="dark"
+          aria-pressed="false">
+          <svg class="bi me-2 opacity-50 theme-icon" width="1em" height="1em">
+            <use href="#moon-stars-fill"></use>
+          </svg>
+          Dark
+          <svg class="bi ms-auto d-none" width="1em" height="1em">
+            <use href="#check2"></use>
+          </svg>
+        </button>
+      </li>
+      <li>
+        <button type="button" class="dropdown-item d-flex align-items-center active" data-bs-theme-value="auto"
+          aria-pressed="true">
+          <svg class="bi me-2 opacity-50 theme-icon" width="1em" height="1em">
+            <use href="#circle-half"></use>
+          </svg>
+          Auto
+          <svg class="bi ms-auto d-none" width="1em" height="1em">
+            <use href="#check2"></use>
+          </svg>
+        </button>
+      </li>
+    </ul>
+  </div>
+
+  <!-- 顶部导航栏 ---------------->
+  <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#"><span class="iconfont icon-map1 big-icon"></span>GoodMapbox</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse"
+        aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarCollapse">
+        <ul class="navbar-nav me-auto mb-2 mb-md-0">
+          <li class="nav-item">
+            <a class="nav-link active" aria-current="page" href="Routine.html" target="_blank">
+              <i class="iconfont icon-dibudaohanglan- little-icon"></i>CityWalk轨迹</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" aria-current="page" href="export_only.html" target="_blank">
+              <i class="iconfont icon-huaban little-icon"></i>Mapbox壁纸</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="#">
+              <i class="iconfont icon-github1 little-icon" href="" target="_blank"></i>Github地址</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link disabled" aria-disabled="true">《WebGIS网络开发》</a>
+          </li>
+        </ul>
+        <form class="d-flex" role="search">
+          <input type="file" class="form-control" id="files">
+          <label class="input-group-text " for="files">Upload</label>
+        </form>
+      </div>
+    </div>
+  </nav>
+  <!-- 底部大容器 ---------------->
+  <div class="container-div">
+    <!-- 左侧内容 -->
+    <div class="left-column">
+      <!-- 新增的大列表,放置图表 -->
+      <div class="big-list">
+        <!-- 图表div -->
+        <div class="small-div" id="small-div-1"></div>
+        <div class="small-div" id="small-div-2"></div>
+        <div class="small-div" id="small-div-3"></div>
+        <div class="small-div" id="poiDensityChart"></div>
+      </div>
+    </div>
+    <!-- 分割线 -->
+    <div class="splitter" id="splitter"></div>
+    <!-- 右侧内容 -->
+    <div id="map" class="right-column">
+      <!-- 面积测量控件 -->
+      <div class="calculation-box">
+        <p>点击地图来绘制一个多边形.</p>
+        <div id="calculated-area"></div>
+      </div>
+      <!-- 距离展示控件 -->
+      <div id="distance" class="distance-container"></div>
+    </div>
+
+  </div>
+  <!-- 柳世钢-----页面基本布局 --------------------------------------------------->
+
+  <!-- 叶垚森-----可折叠侧边栏 -->
+  <!-- Side-Nav -->
+  <div class="side-navbar" id="sidebar">
+    <ul class="nav flex-column text-white w-100">
+      <a href="#" class="nav-link text-white my-2">
+        数据源管理
+      </a>
+      <div id="file-list" class="file-list"></div>
+    </ul>
+  </div>
+  <!-- Main Wrapper -->
+  <div class="my-container">
+    <a class="btn" id="menu-btn"><i class="bx bx-menu"></i></a>
+  </div>
+  <!-- 叶垚森-----可折叠侧边栏 -->
+
+  <!-- 叶垚森--侧边栏实现数据源管理 -->
+  <script src="js_user/geoInfoAnalyse.js"></script>
+  <!-- 叶垚森--侧边栏实现数据源管理 -->
+
+  <!-- 柳世钢--侧边栏实现图表数据 -->
+  <script src="js_user/Echarts_option.js"></script>
+  <script src="js_user/MapboxCom.js"></script>
+  <!-- 柳世钢--侧边栏实现图表数据 -->
+
+  <script>
+    // mapbox
+    mapboxgl.accessToken = 'pk.eyJ1IjoibGxsbHkxMjEzOCIsImEiOiJjbHEwZWN1ZGkwNnJ0MmpxaGp3aGFqM3NlIn0.ofrM8MJd51a14yIglywQfA';
+    const map = new mapboxgl.Map({
+      container: 'map', // 容器ID
+      // 选择Mapbox的核心样式，11后无法换中文
+      style: 'mapbox://styles/mapbox/outdoors-v12', // 样式URL
+      // style: 'mapbox://styles/ltcltdz/clqlqizte00pi01nwehb2aopi/draft',
+      center: [113.936638, 22.532324], // 初始位置 [经度, 纬度]
+      zoom: 15,// 初始缩放级别
+      projection: 'globe' //大气
+    });
+    // --柳世钢--实现左右可拖动大小变化布局-----------------------------------------------
+    const splitter = document.getElementById("splitter");
+    const leftColumn = document.querySelector(".left-column");
+    const rightColumn = document.querySelector(".right-column");
+    const container = document.querySelector(".container-div");
+    let isResizing = false;
+    let initialX = 0;
+    let initialLeftWidth = 0;
+
+    // 鼠标按下事件监听器,记录下当前的鼠标位置和左列的宽度
+    splitter.addEventListener("mousedown", (e) => {
+      isResizing = true;
+      initialX = e.clientX;
+      initialLeftWidth = leftColumn.offsetWidth;
+
+      document.addEventListener("mousemove", resize);
+      document.addEventListener("mouseup", stopResize);
+
+      e.preventDefault();
+
+    });
+
+    //计算新的左右两列的宽度，并设置到对应的元素
+    function resize(e) {
+      // 如果没有在调整窗口大小，就直接返回
+      if (!isResizing) return;
+      // 获取 container 元素的大小和位置信息
+      const containerRect = container.getBoundingClientRect();
+      // 计算鼠标在X轴方向上的移动距离
+      const offsetX = e.clientX - initialX;
+      // 计算元素的新宽度
+      const newLeftWidth = initialLeftWidth + offsetX;
+      const newRightWidth = containerRect.width - newLeftWidth;
+      // 设置元素的宽度
+      leftColumn.style.width = newLeftWidth + "px";
+      rightColumn.style.width = newRightWidth + "px";
+
+      // 更新地图的大小
+      map.resize();
+      // 更新图表大小
+      myChart1.resize();
+      myChart2.resize();
+      myChart3.resize();
+      myChart4.resize();
+    }
+
+    // 处理鼠标释放事件,移除鼠标移动和鼠标释放的事件监听器
+    function stopResize() {
+      isResizing = false;
+      document.removeEventListener("mousemove", resize);
+      document.removeEventListener("mouseup", stopResize);
+    }
+    // --柳世钢--实现左右可拖动大小变化布局-----------------------------------------------
+
+    //-- 柳世钢--侧边栏实现图表数据，后一个POI数据由叶垚森获取及展示-------------------------
+    var chartDom_div1 = document.getElementById('small-div-1');
+    var myChart1 = echarts.init(chartDom_div1);
+    var chartDom_div2 = document.getElementById('small-div-2');
+    var myChart2 = echarts.init(chartDom_div2);
+    var chartDom_div3 = document.getElementById('small-div-3');
+    var myChart3 = echarts.init(chartDom_div3);
+    var chartDom_div4 = document.getElementById('poiDensityChart');
+    var myChart4 = echarts.init(chartDom_div4);
+    var option_SZweather, option_Weather
+
+    // 设置左侧图表
+    myChart1.setOption(option_SZweather);
+    myChart2.setOption(option_Weather);
+    option_AvgWeather && myChart3.setOption(option_AvgWeather);
+    //-- 柳世钢--侧边栏实现图表数据，后一个POI数据由叶垚森获取及展示-----------------------
+
+  </script>
+</body>
+
+</html>

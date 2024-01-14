@@ -1,0 +1,56 @@
+/* 侧边栏 */
+.side-navbar {
+    width: 180px;
+    height: 33%;
+    position: fixed;
+    right: -180px; /* 初始在屏幕外 */
+    top: 40%;
+    background-color: #656059;
+    transition: right .5s;
+    z-index: 1000; /* 确保它在其他内容之上 */
+    border-radius: 10px; /* 圆角 */
+}
+.file-list-item {
+    display: flex;
+    align-items: center; /* 确保内容在垂直方向上居中 */
+    padding-left: 5px; /* 在左侧添加5px的内边距 */
+}
+.active-nav {
+    right: -5px; 
+}
+/* 展开按钮 */
+#menu-btn {
+    position: fixed;
+    right: -5px; 
+    top: 50%;
+    z-index: 1001;
+    cursor: pointer;
+    color: #fff;
+    background-color: #656059;
+    transition: right .5s;
+}
+
+
+/* 主内容容器在侧边栏展开时的样式 */
+.active-cont {
+    margin-right: 180px; 
+    transition: margin-right .5s; 
+}
+.nav-link {
+    color: white;
+    text-align: center; /* 添加居中对齐 */
+    display: block; /* 确保链接以块状元素形式展示，以便居中 */
+    margin: auto; /* 自动外边距用于水平居中 */
+}
+.nav-link:active, .nav-link:focus, .nav-link:hover {
+    background-color: #ffffff26;
+}
+.my-container input {
+    border-radius: 2rem;
+    padding: 2px 20px;
+}
+.active-nav + .my-container #menu-btn {
+    right: 174px; 
+}
+
+

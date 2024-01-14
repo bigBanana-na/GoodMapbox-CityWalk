@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>自定义CityWalk路线</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- 引入 Mapbox GL JS  -->
+    <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.js"></script>
+    <link
+      href="https://api.tiles.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.css"
+      rel="stylesheet"
+    />
+    <!-- 引入 Mapbox GL Draw -->
+    <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v1.0.9/mapbox-gl-draw.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v1.0.9/mapbox-gl-draw.css"
+      type="text/css"
+    />
+    <!-- 引入Mapbox GL Geocoder插件 -->
+    <script src='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.7.0/mapbox-gl-geocoder.min.js'></script>
+    <link rel='stylesheet' href='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.7.0/mapbox-gl-geocoder.css' type='text/css' />
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: sans-serif;
+      }
+
+      #map {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: 100%;
+      }
+
+      .info-box {
+        position: absolute;
+        margin: 20px;
+        width: 25%;
+        top: 0;
+        bottom: 20px;
+        padding: 20px;
+        background-color: #fff;
+        overflow-y: scroll;
+      }
+    </style>
+  </head>
+
+  <body>
+     <!-- 王斯畅 ----完成整个文件的搭建------------------------------------------------------------------------>
+
+    <div id="map"></div>
+
+    <div class="info-box">
+      <p>
+        使用右边的绘图工具绘制你的路线。请时不时点击你需要途径的地方。
+      </p>
+      <div id="directions"></div>
+    </div>
+
+    <script>
+
+      mapboxgl.accessToken = 'pk.eyJ1IjoibHRjbHRkeiIsImEiOiJjbHBqNnVjY3kwNjdhMmxwYWU3d3R4ZTBxIn0.8WIfb5gZAL4qR4OKitBPog';
+      const map = new mapboxgl.Map({
+        container: 'map', // 定义地图容器的id
+        style: 'mapbox://styles/mapbox/streets-v12', 
+        center: [114, 22.6], // 经纬度
+        zoom: 14.5 // 缩放
+      });
+
+      //搜索框
+        map.addControl(
+            new MapboxGeocoder({
+                accessToken: mapboxgl.accessToken,
+                mapboxgl: mapboxgl
+            })
+        );
+
+
+
+      
+
+        const draw = new MapboxDraw({
+    // 不显示所有绘制工具，只显示线段和删除工具
+    displayControlsDefault: false,
+    controls: {
+        line_string: true,
+        trash: true
+    },
+    // 默认绘制模式为绘制线段
+    defaultMode: 'draw_line_string',
+    styles: [
+        // 设置用户输入坐标的线段样式
+        {
+        'id': 'gl-draw-line',
+        'type': 'line',
+        'filter': [
+            'all',
+            ['==', '$type', 'LineString'],
+            ['!=', 'mode', 'static']
+        ],
+        'layout': {
+            'line-cap': 'round',
+            'line-join': 'round'
+        },
+        'paint': {
+            'line-color': '#438EE4',
+            'line-dasharray': [0.2, 2],
+            'line-width': 2,
+            'line-opacity': 0.7
+        }
+        },
+        // 设置顶点的光晕样式
+        {
+        'id': 'gl-draw-polygon-and-line-vertex-halo-active',
+        'type': 'circle',
+        'filter': [
+            'all',
+            ['==', 'meta', 'vertex'],
+            ['==', '$type', 'Point'],
+            ['!=', 'mode', 'static']
+        ],
+        'paint': {
+            'circle-radius': 12,
+            'circle-color': '#FFF'
+        }
+        },
+        // 设置顶点的样式
+        {
+        'id': 'gl-draw-polygon-and-line-vertex-active',
+        'type': 'circle',
+        'filter': [
+            'all',
+            ['==', 'meta', 'vertex'],
+            ['==', '$type', 'Point'],
+            ['!=', 'mode', 'static']
+        ],
+        'paint': {
+            'circle-radius': 8,
+            'circle-color': '#438EE4'
+        }
+        }
+    ]
+    });
+
+      // 添加绘图工具
+      map.addControl(draw);
+
+      // 添加路线图层
+      map.on('draw.create', updateRoute);
+      map.on('draw.update', updateRoute);
+      map.on('draw.delete', removeRoute);
+
+      
+      function updateRoute() {
+        removeRoute(); 
+
+        const profile = 'driving'; // 设定路线规划的交通方式，本来应该是walking的，但是这个模式经常因为找不到人行道而出错，所以改driving，OSM的锅（
+
+        // 设置绘图工具的数据
+        const data = draw.getAll();
+        const lastFeature = data.features.length - 1;
+        const coords = data.features[lastFeature].geometry.coordinates;
+        // 定义格式
+        const newCoords = coords.join(';');
+        // 设置半径为25米
+        const radius = coords.map(() => 25);
+        getMatch(newCoords, radius, profile);
+      }
+
+      // Make a Map Matching request
+      async function getMatch(coordinates, radius, profile) {
+        // 分割半径数组
+        const radiuses = radius.join(';');
+        // 创建请求
+        const query = await fetch(
+          `https://api.mapbox.com/matching/v5/mapbox/${profile}/${coordinates}?geometries=geojson&radiuses=${radiuses}&steps=true&access_token=${mapboxgl.accessToken}`,
+          { method: 'GET' }
+        );
+        const response = await query.json();
+        // 报错
+        if (response.code !== 'Ok') {
+          alert(
+            `${response.code} - ${response.message}.\n\nFor more information: https://docs.mapbox.com/api/navigation/map-matching/#map-matching-api-errors`
+          );
+          return;
+        }
+        const coords = response.matchings[0].geometry;
+
+
+
+
+        addRoute(response);//添加路线图层
+        
+        getInstructions(response.matchings[0]);
+      }
+
+      function getInstructions(data) {//设置路线指示
+        // Target the sidebar to add the instructions
+        const directions = document.getElementById('directions');
+        let tripDirections = '';
+        // Output the instructions for each step of each leg in the response object
+        for (const leg of data.legs) {
+          const steps = leg.steps;
+          for (const step of steps) {
+            tripDirections += `<li>${step.maneuver.instruction}</li>`;
+          }
+        }
+        directions.innerHTML = `<p><strong>Trip duration: ${Math.floor(
+          data.duration / 60
+        )} min.</strong></p><ol>${tripDirections}</ol>`;
+      }
+
+      // 添加路线图层的函数
+      function addRoute(response) {
+        const coords = response.matchings[0].geometry;
+
+        if (map.getSource('route')) {
+            map.removeLayer('route');
+            map.removeSource('route');
+        } else {
+            map.addSource('route', {
+            type: 'geojson',
+            data: {
+                type: 'Feature',
+                properties: {},
+                geometry: coords
+            }
+            });
+
+            // 添加一个没有定义 line-dasharray 的线图层来填充虚线中的间隙
+            map.addLayer({
+            id: 'route-background',
+            type: 'line',
+            source: 'route',
+            paint: {
+                'line-color': '#FF00FF',// 线颜色
+                'line-width': 8,
+                'line-opacity': 0.3
+            }
+            });
+
+            // 添加一个线图层，将 line-dasharray 设置为 dashArraySequence 中的第一个值
+            map.addLayer({
+            id: 'route',
+            type: 'line',
+            source: 'route',
+            paint: {
+                'line-color': '#00BFFF',// 虚线颜色
+                'line-width': 4,
+                'line-opacity': 0.8,
+                'line-dasharray': [0, 4, 3]
+            }
+            });
+
+            // 一个有效的 line-dasharray 值数组，指定形成虚线模式的交替破折号和间隙的长度
+            const dashArraySequence = [
+            [0, 4, 3],
+            [0.5, 4, 2.5],
+            [1, 4, 2],
+            [1.5, 4, 1.5],
+            [2, 4, 1],
+            [2.5, 4, 0.5],
+            [3, 4, 0],
+            [0, 0.5, 3, 3.5],
+            [0, 1, 3, 3],
+            [0, 1.5, 3, 2.5],
+            [0, 2, 3, 2],
+            [0, 2.5, 3, 1.5],
+            [0, 3, 3, 1],
+            [0, 3.5, 3, 0.5]
+            ];
+
+            let step = 0;
+
+            function animateDashArray(timestamp) {
+            // 使用 dashArraySequence 中的下一个值更新 line-dasharray。表达式 `timestamp / 50` 中的除数控制动画速度。
+            const newStep = parseInt(
+                (timestamp / 50) % dashArraySequence.length
+            );
+
+            if (step !== newStep) {
+                map.setPaintProperty('route', 'line-dasharray', dashArraySequence[newStep]);
+                step = newStep;
+            }
+
+            requestAnimationFrame(animateDashArray);
+            }
+
+            animateDashArray(0);
+
+            // 开始呼吸灯效果
+            var opacity = 1;
+            var decreasing = true;
+            setInterval(function() {
+            if (decreasing) {
+                opacity -= 0.1;
+                if (opacity <= 0.2) {//虚线的透明度的最小值
+                decreasing = false;
+                }
+            } else {
+                opacity += 0.1;
+                if (opacity >= 0.7) {//虚线的透明度的最大值
+                decreasing = true;
+                }
+            }
+            map.setPaintProperty('route-background', 'line-opacity', opacity);
+            }, 100);
+        }
+        }
+
+
+      // 退出路线图层的函数
+      function removeRoute() {
+        if (!map.getSource('route')) return;
+        map.removeLayer('route');
+        map.removeSource('route');
+      }
+    </script>
+     <!-- 王斯畅 ----完成整个文件的搭建------------------------------------------------------------------------>
+  </body>
+</html>

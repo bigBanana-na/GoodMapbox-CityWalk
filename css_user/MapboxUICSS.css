@@ -1,0 +1,261 @@
+/* Show it is fixed to the top */
+body {
+  /* min-height: 75rem; */
+  padding-top: 3.4rem;
+  height: 100%;
+  margin: 0;
+  padding-bottom: 0;
+}
+
+html {
+  margin: 0;
+  height: 100%;
+  padding: 0;
+}
+
+.container-div {
+  /* 弹性布局，使子元素可以按照一定的比例分配空间 */
+  display: flex;
+  margin-bottom: 0;
+  padding: 0;
+  /* 减去导航栏高度 */
+  min-height: calc(100% - 56px);
+  height: 100%;
+}
+
+.left-column {
+  flex-grow: 1; /* 设置为 1，使其可以占据剩余的空间 */
+  overflow: auto;
+  padding: 10px;
+  width: 50%;
+}
+
+.right-column {
+  flex-grow: 1;
+  overflow: auto; /* 设置为 auto，使其可以滚动 */
+  padding: 10px;
+}
+
+/* 设置中分线的样式 */
+.splitter {
+  width: 8px;
+  cursor: col-resize;
+  background-color: #999;
+}
+
+/*
+ * Globals
+ */
+
+
+/* Custom default button */
+.btn-light,
+.btn-light:hover,
+.btn-light:focus {
+  color: #333;
+  text-shadow: none;
+  /* Prevent inheritance from `body` */
+}
+
+/* 
+mapbox加入样式
+ */
+#map {
+  position: relative;
+  padding: 0;
+  margin: 0;
+  top: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+  /*overflow: hidden;  防止地图溢出 */
+}
+
+.calculation-box,
+#distance {
+  position: absolute;
+  /* 设置为 absolute，使其可以相对于 #map 定位 */
+  bottom: 40px;
+  /* 与 #map 的底部对齐 */
+  left: 50%;
+  /* 与 #map 的中间对齐 */
+  transform: translateX(-50%);
+  /* 使用 transform 属性来确保元素的中心与 #map 的中间对齐 */
+  z-index: 9999;
+}
+
+.calculation-box {
+  height: 100px;
+  width: 150px;
+  position: absolute;
+  bottom: 40px;
+  /* left: 10px; */
+  /* background-color: rgba(0, 0, 0, 0.9); */
+  padding: 15px;
+  text-align: center;
+  border-radius: 10px;
+  box-shadow: #999;
+}
+
+p {
+  font-family: 'Open Sans';
+  margin: 0;
+  font-size: 13px;
+}
+
+/* --------左侧列------ */
+
+
+.big-list {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  padding: 0 2.5%;
+}
+
+.small-div {
+  width: 100%;
+  height: 300px;
+  margin-bottom: 10px;
+  background-color: var(--bs-body-bg);
+  color: var(--bs-body-color);
+  text-align: center;
+  padding: 10px;
+  border: #999 solid 1px;
+}
+
+.big-icon {
+  font-size: 30px;
+  /* 设置图标的大小 */
+  margin: 0 10px;
+  /* 设置图标的左右距离 */
+}
+
+.little-icon {
+  font-size: 15px;
+  /* 设置图标的大小 */
+  margin: 0 10px;
+  /* 设置图标的左右距离 */
+
+}
+
+/* ::-webkit-scrollbar {
+  width: 8px;
+  height: 10px;
+}
+::-webkit-scrollbar-track{
+  background-color: #999;
+  border-radius: 50px;
+}
+::-webkit-scrollbar-thumb{
+  background-color: beige;
+  border-radius: 50px;
+} */
+
+.bd-placeholder-img {
+  font-size: 1.125rem;
+  text-anchor: middle;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
+}
+
+@media (min-width: 768px) {
+  .bd-placeholder-img-lg {
+    font-size: 3.5rem;
+  }
+}
+
+.b-example-divider {
+  width: 100%;
+  height: 3rem;
+  background-color: rgba(0, 0, 0, .1);
+  border: solid rgba(0, 0, 0, .15);
+  border-width: 1px 0;
+  box-shadow: inset 0 .5em 1.5em rgba(0, 0, 0, .1), inset 0 .125em .5em rgba(0, 0, 0, .15);
+}
+
+.b-example-vr {
+  flex-shrink: 0;
+  width: 1.5rem;
+  height: 100vh;
+}
+
+.bi {
+  vertical-align: -.125em;
+  fill: currentColor;
+}
+
+.nav-scroller {
+  position: relative;
+  z-index: 2;
+  height: 2.75rem;
+  overflow-y: hidden;
+}
+
+.nav-scroller .nav {
+  display: flex;
+  flex-wrap: nowrap;
+  padding-bottom: 1rem;
+  margin-top: -1px;
+  overflow-x: auto;
+  text-align: center;
+  white-space: nowrap;
+  -webkit-overflow-scrolling: touch;
+}
+
+.btn-bd-primary {
+  --bd-violet-bg: #000;
+  --bd-violet-rgb: 112.520718, 44.062154, 249.437846;
+
+  --bs-btn-font-weight: 600;
+  --bs-btn-color: var(--bs-white);
+  --bs-btn-bg: var(--bd-violet-bg);
+  --bs-btn-border-color: var(--bd-violet-bg);
+  --bs-btn-hover-color: var(--bs-white);
+  --bs-btn-hover-bg: #2C73D2;
+  --bs-btn-hover-border-color: #2C73D2;
+  --bs-btn-focus-shadow-rgb: var(--bd-violet-rgb);
+  --bs-btn-active-color: var(--bs-btn-hover-color);
+  --bs-btn-active-bg: #0089BA;
+  --bs-btn-active-border-color: #0089BA;
+}
+
+.bd-mode-toggle {
+  z-index: 1500;
+}
+
+.bd-mode-toggle .dropdown-menu .active .bi {
+  display: block !important;
+}
+
+/* --王斯畅---------------------- */
+.MapStyleSelectItem {
+  display: inline-block;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 1px solid #ccc;
+}
+
+.MapStyleSelectItem:not(:first-of-type) {
+  margin-left: 8px;
+}
+
+.MapStyleSelectItem--selected {
+  box-shadow: 0 0 0 1px white, 0 0 0 3px #339dff;
+}
+
+.text-center {
+  justify-content: center;
+  align-items: center;
+  margin: auto;
+}
+
+#export {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}

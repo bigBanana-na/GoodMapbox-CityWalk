@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset='utf-8' />
+    <title>Export Map as Image</title>
+    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+    <link rel="canonical" href="https://getbootstrap.com/docs/5.3/examples/navbar-fixed/">
+
+    <script src='https://api.mapbox.com/mapbox-gl-js/v2.6.1/mapbox-gl.js'></script>
+    <link href='https://api.mapbox.com/mapbox-gl-js/v2.6.1/mapbox-gl.css' rel='stylesheet' />
+    <!-- 引入Mapbox GL Geocoder插件 -->
+    <script
+        src='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.7.0/mapbox-gl-geocoder.min.js'></script>
+    <link rel='stylesheet'
+        href='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.7.0/mapbox-gl-geocoder.css'
+        type='text/css' />
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@docsearch/css@3">
+    <script src="js/echarts.js"></script>
+    <script src="js/bootstrap.bundle.min.js"></script>
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        .MapStyleSelectItem {
+            margin-left: 20px;
+            display: inline-block;
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 1px solid #ccc;
+        }
+
+        .MapStyleSelectItem:not(:first-of-type) {
+            margin-left: 8px;
+        }
+
+        .MapStyleSelectItem--selected {
+            box-shadow: 0 0 0 1px white, 0 0 0 3px #339dff;
+        }
+
+        .bg-white {
+            background: #fff;
+        }
+
+        #export {
+            position: relative;
+            margin-left: 20px;
+        }
+    </style>
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        #map {
+            position: absolute;
+            top: 50px;
+            bottom: 0;
+            width: 100%;
+        }
+    </style>
+</head>
+
+
+
+<body>
+    <!-- 王斯畅 ----完成整个文件的搭建------------------------------------------------------------------------>
+    <!-- <input id="city" type="text" placeholder="输入城市名">
+<button id="confirm">确认城市</button> -->
+
+
+    <!-- 顶部导航栏 -->
+    <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+        <div id='button0' class="MapStyleSelectItem MapStyleSelectItem--selected" style="background: rgb(201, 73, 73);">
+        </div>
+        <div id='button1' class="MapStyleSelectItem" style="background: rgb(67, 90, 141);"></div>
+        <div id='button2' class="MapStyleSelectItem" style="background: rgb(86, 24, 116);"></div>
+        <div id='button3' class="MapStyleSelectItem" style="background: rgb(0, 0, 0);"></div>
+        <div id='button4' class="MapStyleSelectItem" style="background: rgb(230, 229, 214);"></div>
+        <button id="export" class="btn bg-white">导出图片</button>
+
+    </nav>
+
+
+
+
+    <div id='map'></div>
+    <div id='overlay'></div>
+
+
+
+
+    <script src="https://unpkg.com/@mapbox/polyline@1.2.1/src/polyline.js"></script>
+    <script>
+
+
+        mapboxgl.accessToken = 'pk.eyJ1IjoibHRjbHRkeiIsImEiOiJjbHBqNnVjY3kwNjdhMmxwYWU3d3R4ZTBxIn0.8WIfb5gZAL4qR4OKitBPog';//这里填写你的mapbox的token
+        var map = new mapboxgl.Map({
+            container: 'map', // container ID
+            style: 'mapbox://styles/ltcltdz/clqlqizte00pi01nwehb2aopi/draft', // style URL，草稿模式
+            center: [114, 23], // starting position [lng, lat]
+            zoom: 9,// starting zoom
+            projection: 'equirectangular'
+
+        });
+
+
+        //搜索框
+        map.addControl(
+            new MapboxGeocoder({
+                accessToken: mapboxgl.accessToken,
+                mapboxgl: mapboxgl
+            })
+        );
+
+
+        // 定义样式链接
+        const styles = [
+            'mapbox://styles/ltcltdz/clqlqizte00pi01nwehb2aopi/draft',
+            'mapbox://styles/ltcltdz/clpj71wd900oy01r53jdz25nc/draft',
+            'mapbox://styles/ltcltdz/clqlr6rwo00k501r5g94pb0ln/draft',
+            'mapbox://styles/ltcltdz/clqlq9wdp00q001qv7dfq9ber/draft',
+            'mapbox://styles/ltcltdz/clqlqw3rb00ox01o3a5i0a5ba/draft'
+        ];
+        //改变地图样式
+        $.each(styles, function (index, style) {
+            $(`#button${index}`).click(function () {
+                // 移除所有按钮的选中样式
+                $('.MapStyleSelectItem').removeClass('MapStyleSelectItem--selected');
+                // 为被点击的按钮添加选中样式
+                $(this).addClass('MapStyleSelectItem--selected');
+                // 改变地图样式
+                map.setStyle(style);
+            });
+        });
+
+
+        map.on('style.load', function () {
+            fetch('JSON_Data/Futian_cw.json')//获取json数据,修改为自己的json文件，注意路径，这里是相对路径，如果是绝对路径，直接写绝对路径即可
+                .then(response => response.json())
+                .then(data => {
+                    map.addSource('route', {
+                        'type': 'geojson',
+                        'data': data
+                    });
+                    // 添加阴影图层
+                    map.addLayer({
+                        'id': 'route-shadow',
+                        'type': 'line',
+                        'source': 'route',
+                        'layout': {
+                            'line-join': 'round',
+                            'line-cap': 'round'
+                        },
+                        'paint': {
+                            'line-color': '#FFFF00',//阴影颜色
+                            'line-width': 15,
+                            'line-opacity': 0.3
+                        }
+                    });
+
+                    // 添加路线图层
+                    map.addLayer({
+                        'id': 'route',
+                        'type': 'line',
+                        'source': 'route',
+                        'layout': {
+                            'line-join': 'round',
+                            'line-cap': 'round'
+                        },
+                        'paint': {
+                            'line-color': '#FFA500',//线颜色
+                            'line-width': 8
+                        }
+                    });
+
+
+
+                    // 获取路线的坐标数据
+                    var coordinates = data.features[0].geometry.coordinates;
+
+                    // 添加动画图层
+                    var numPoints = 10; // 动画点的数量
+                    var pointsData = {
+                        'type': 'FeatureCollection',
+                        'features': []
+                    };
+                    for (var i = 0; i < numPoints; i++) {
+                        pointsData.features.push({
+                            'type': 'Feature',
+                            'geometry': {
+                                'type': 'Point',
+                                'coordinates': coordinates[0]
+                            }
+                        });
+                    }
+
+                    map.addSource('points', {
+                        'type': 'geojson',
+                        'data': pointsData
+                    });
+
+                    map.addLayer({
+                        'id': 'points',
+                        'type': 'circle',
+                        'source': 'points',
+                        'paint': {
+                            'circle-radius': 5,
+                            'circle-color': '#3887be'//点的颜色
+                        }
+                    });
+
+                    // 开始动画
+                    var indices = new Array(numPoints).fill(0);
+                    function animatePoint(i) {
+                        // 更新点的位置
+                        if (indices[i] < coordinates.length) {
+                            pointsData.features[i].geometry.coordinates = coordinates[indices[i]];
+                            indices[i]++;
+                        } else {
+                            // 当一个点到达终点时，将它重置到起点
+                            indices[i] = 0;
+                        }
+
+                        map.getSource('points').setData(pointsData);
+
+                        // 无论是否到达终点，都继续动画
+                        setTimeout(function () {
+                            animatePoint(i);
+                        }, 50); // 每个点的速度都要一样
+                    }
+
+                    for (var i = 0; i < numPoints; i++) {
+                        // 每个点的动画在前一个点开始后的一段时间开始
+                        setTimeout(function (i) {
+                            animatePoint(i);
+                        }, i * 1000, i);
+                    }
+
+                    // 开始呼吸灯效果
+                    var opacity = 1;
+                    var decreasing = true;
+                    setInterval(function () {
+                        if (decreasing) {
+                            opacity -= 0.1;
+                            if (opacity <= 0.1) {
+                                decreasing = false;
+                            }
+                        } else {
+                            opacity += 0.1;
+                            if (opacity >= 0.7) {
+                                decreasing = true;
+                            }
+                        }
+                        map.setPaintProperty('route-shadow', 'line-opacity', opacity);
+                    }, 100);
+                })
+                .catch(error => {
+                    console.error('Failed to load data:', error);
+                });
+        });
+
+
+        //导出图片
+        $('#export').click(function () {
+            var center = map.getCenter();
+            var zoom = map.getZoom();
+            var bearing = map.getBearing();
+            var pitch = map.getPitch();
+            var styleUrl = map.getStyle().sprite; // 获取当前地图样式的 URL
+            var styleId = styleUrl.replace('mapbox://sprites/ltcltdz/', '').replace('/draft', ''); // 提取样式 ID
+            var url = `https://api.mapbox.com/styles/v1/ltcltdz/${styleId}/draft/static/${center.lng},${center.lat},${zoom},${bearing},${pitch}/1200x1200?access_token=${mapboxgl.accessToken}`;
+            $('<a>').attr({
+                href: url,
+                download: 'map.png'
+            })[0].click();
+        });
+
+
+
+        // 根据城市名定位
+        // document.getElementById('confirm').addEventListener('click', function() {
+        //     var city = document.getElementById('city').value;
+        //     // 使用Mapbox Geocoding API获取城市的经纬度
+        //     fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${city}.json?access_token=${mapboxgl.accessToken}`)
+        //         .then(response => response.json())
+        //         .then(data => {
+        //             var coordinates = data.features[0].center;
+        //             map.flyTo({ center: coordinates });
+        //         });
+        // });
+
+    </script>
+    <!-- 王斯畅 ----完成整个文件的搭建------------------------------------------------------------------------>
+</body>
+
+</html>
